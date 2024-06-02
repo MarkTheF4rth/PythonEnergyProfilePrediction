@@ -1,0 +1,145 @@
+This section will cover the algorithms used for experimentation in this paper, as well as the reasoning behind their
+usage.
+Each algorithm is intended to expose different qualities of a Python program, in an attempt to expose edge cases that
+may arise from assumptions made.
+We will also use this section to highlight baseline energy usage for each algorithm, which can be used for later
+comparisons.
+
+We will attempt to keep algorithms at a baseline of 10 minute runs, this duration is chosen simply for convenience, as
+it is short enough to run multiple times, and long enough to aid visual analysis of the data.
+Each experiment will be run 10 times, to inspect variance in run time and energy usage, outliers will be identified by
+unexplained rises in temperature, or large deviation from the mean.
+
+\subsubsection{Sleep}
+The most trivial process to profile is the sleep command, profiling a sleeping python script should give us a good
+baseline for the energy usage of the python interpreter, and the footprint of the various profiling tools.
+
+As can be seen in fig~\ref{fig:sleep_repeating}, the python interpreter has a completely negligible energy impact, and
+can not be distinguished from the noise of the system.
+For this reason, when forecasting future results, we can ignore baseline costs.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/implementation/sleep_repetition}
+    \caption{Running sleep within python for 10 minutes, experiment durations are highlighted in grey (one result has
+    been removed due to incorrect execution)}
+    \label{fig:sleep_repeating}
+\end{figure}
+
+\textbf{Bash Time}
+The sleep command is important for understanding the bash profiling tool, as we can see that sleeping has no visible
+effect on overall power consumption, we will attempt to make the assumption that when bash profiling, time not spent in
+usr or sys accounts for zero energy usage.
+This assumption is likely incorrect, as simply executing the script will incur an energy cost, however we believe that
+the value is low enough that it can be safely ignored.
+
+\textbf{PyTracer}
+Unfortunately the sleep command itself is too trivial to create any output that can be used for meaningful analysis, as
+\ref{lst:sleep-command-trace} shows, the only output is the loading of constants and the return value.
+This is consistent with the theory that the sleep method has no energy cost, as it can be clearly seen that no opcodes
+are executed during its duration.
+For the time being we have chosen to add datetimes to each opcode execution, however we will revisit this decision when
+more opcodes are executed, as the additional call to the datetime module may be adding overhead to the process.
+
+\begin{lstlisting}[caption={systemd timer},captionpos=b,label={lst:sleep-command-trace}]
+2024-05-27 15:04:14.334866 # LOAD_CONST (100) #
+2024-05-27 15:04:14.334891 # LOAD_CONST (100) #
+2024-05-27 15:04:14.334898 # IMPORT_NAME (108) #
+2024-05-27 15:04:14.334903 # STORE_FAST (125) #
+2024-05-27 15:04:14.334910 # LOAD_FAST (124) #
+2024-05-27 15:04:14.334916 # LOAD_METHOD (160) #
+2024-05-27 15:04:14.334921 # LOAD_CONST (100) #
+2024-05-27 15:04:14.334927 # PRECALL (166) #
+2024-05-27 15:04:14.334933 # CALL (171) #
+2024-05-27 15:14:14.335116 # POP_TOP (1) #
+2024-05-27 15:14:14.335206 # LOAD_CONST (100) #
+2024-05-27 15:14:14.335230 # RETURN_VALUE (83) #
+\end{lstlisting}
+
+\subsubsection{N-Body}
+The n-body problem is a classic problem in physics, and is used to simulate the motion of celestial bodies in a system.
+In order to come close to the 10-minute testing time that we have previously implemented for sleep, we are running this
+algorithm with an input of 50 million.
+As seen in~\ref{fig:nbody_repeating}, the algorithm is running at an average of 652 seconds, which is acceptably close
+to the 10-minute mark, with an average of 15211 joules of energy used.
+Visual analysis of the graph shows that energy usage varies highly (with a range of 13448 to 17119 joules), though this
+seems to be directly proportional to the variance of time - this suggests that more promising results will be seen from
+approaches that test for time, rather than the actual execution of the script.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/implementation/nbody_repeating}
+    \caption{Running the n-body problem, experiment durations are highlighted in grey}
+    \label{fig:nbody_repeating}
+\end{figure}
+
+\textbf{Bash Time}
+The n-body problem is a good example of a pure user space script, after 10 runs the mean of each time is as follows:
+\textbf{real} - \textit{10m:48s} (std - 55s)
+\textbf{user} - \textit{10m:48s} (std - 55s)
+\textbf{sys} - \textit{0.02s} (std - 0.01s)
+
+\subsubsection{Binary Trees}
+Binary trees are a simple data structure that are classically used to as an excercise in computer science - for this
+experiment we have specifically chosen an implementation that avoids multithreading, as we are interested in having
+multiple algorithms that are sequential.
+As seen in~\ref{fig:btree_repeating}, the algorithm is running at an average of 457 seconds, with an average energy
+usage of 10860 Joules, this is a promisingly close result to the n-body problem (an average of 23.3J/s compared to
+23.8J/s), and suggests that the energy usage of the python interpreter is consistent across different sequential
+algorithms.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/implementation/btree_repeating}
+    \caption{Running the binary tree algorithm, experiment durations are highlighted in grey}
+    \label{fig:btree_repeating}
+\end{figure}
+
+\subsubsection{Mandelbrot}
+Mandelbrot is a classic algorithm used to generate fractal images, and is often used as a benchmark for performance, we
+have chosen this specific implementation as it is highly multithreaded, as can be seen in~\ref{fig:mandelbrot_repeating},
+the core and package-0 domains are not only far lower than previous sequential algorithms, they are also far more stable;
+this suggests that further research must be done to understand how the energy usage of multithreaded applications
+affect energy usage.
+
+In our preliminary experiments, the Mandelbrot algorithm has shown to execute at an average execution time of 585
+seconds, with an average energy usage of 13341 Joules (averaging 22.8J/s).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/implementation/mandelbrot_repeating}
+    \caption{Running the mandelbrot algorithm, experiment durations are highlighted in grey}
+    \label{fig:mandelbrot_repeating}
+\end{figure}
+
+\subsubsection{DataFrame Tester}
+Python DataFrames are a powerful tool used for data manipulation and analysis, and is being used extensively to generate
+the data seen in this report, we believe that DataFrame benchmarking is a useful avenue as they are often heavily
+involved in running underlying C binaries, together with the fact that there may be some level of multithreading
+implemented.
+For this experiment we have found an article looking to compare and benchmark the performance of different dataframe
+libraries~\cite{DataframeBenchmark} - unfortunately two of the four benchmarking libraries were too cumbersome to
+implement, this is ultimately not an issue as the validity of the test is not a concern of this report.
+
+As seen in~\ref{fig:dataframe_repeating}, the algorithm is running at an average of 217 seconds, with an average energy
+usage of 5200 Joules, unfortunately, it has been difficult to find an input to reach an average 10-minute mark.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/implementation/dataframe_repetition}
+    \caption{Running the dataframe tester, experiment durations are highlighted in grey}
+    \label{fig:dataframe_repeating}
+\end{figure}
+
+\textbf{Bash Time}
+The DataFrame tester brings two facets, firstly, the real time is lower than the sum of user and sys time, this
+indicates that the process must be multithreaded - when looking at the sleep experiment, we suggested that time spent
+outside the user and sys time would incur zero energy cost, while this experiment suggests that it might be
+pertinent to ignore the value completely.
+
+The statistics of the exploratory run are as follows:
+\textbf{real} - \textit{3m:37s} (std - 15s)
+\textbf{user} - \textit{5m:9s} (std - 14s)
+\textbf{sys} - \textit{44s} (std - 1.5s)
+

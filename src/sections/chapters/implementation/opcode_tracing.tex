@@ -1,0 +1,19 @@
+As purely looking at CPU time doesn't appear to be a reliable method of predicting energy usage, we will now attempt to
+look at the opcodes being executed by each script to see if a conclusion can be drawn between executed opcodes and
+energy usage.
+We have already noted that opcodes can be retrieved by using the sys module, unfortunately there does not appear to be
+a process that can also retrieve the operands provided, which have been suggested to affect energy usage, but possibly
+not by a significant amount~\cite{OperandPower}
+
+\subsubsection{Opcode Gathering}
+In the exploration of profiling tools~\ref{subsubsec:pytracer} we simply took each opcode and printed it to console.
+This is a good start, but fails to gather data in a meaningful way, and will be useless for larger programs that execute
+more opcodes.
+
+For testing opcode gathering in this section we will use the nbody algorithm, as it scales easily and has a large number
+of operations involved.
+The primary problem with any kind of granular tracing is that the operations involved in the trace naturally interfere
+with the execution of the script itself, as opcodes increase in amount this becomes a very real problem, as we will see
+in following examples.
+
+To begin with, we will test

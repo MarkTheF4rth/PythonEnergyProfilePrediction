@@ -93,7 +93,7 @@ the decision of correct logging intervals to minimize overhead while still retri
     \label{fig:python_log_time}
 \end{figure}
 
-\subsubsection{PyTracer}
+\subsubsection{PyTracer}\label{subsubsec:pytracer}
 As an alternative to logging, the python sys package includes a settrace module\cite{PythonSystrace} that allows for the
 injection of code into individual callbacks of the python interpreter.
 This is a powerful tool, as it allows us to analyse individual stack frames, we can use this to analyse executed opcodes

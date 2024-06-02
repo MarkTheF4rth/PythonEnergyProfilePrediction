@@ -1,0 +1,20 @@
+The first profiling method we will test is simply bash time, the assumption to make for this section is that the energy
+profile can be accurately predicted by simply knowing the amount of time a process has spent in real, user, and kernel
+time.
+
+\subsubsection{Internal Consistency}
+The first step in our process is to verify that running an algorithm multiple times remains consistent in terms of the
+amount of energy used over the time taken.
+From the previous section, it is clear that there is a large amount of variance in time taken for algorithms to complete
+- this section seeks to prove that the variance of time predictably scales with the variance of energy usage.
+If we can prove that the energy usage of an algorithm is consistent over multiple runs, this would suggest that time
+measurements are a required component of predicting energy usage.
+
+\subsubsection{Naive Prediction}
+The first step in our process will be to test how reliable simply timing a process is.
+As covered in~\ref{subsubsec:bash_time}, bash time provides three values for real, user, and sys time, for the naive
+approach we will attempt to take the overall energy usage of the application, and then split it into a ratio of each of
+these values - real time encompasses both usr and sys time, so the remaining value for the ration will be the difference
+between the summed time in the CPU and the real time (for example, if an application takes 1 second of real time, and
+has 0.4 seconds of usr and sys time, the ratio would be 0.2:0.4:0.4).
+

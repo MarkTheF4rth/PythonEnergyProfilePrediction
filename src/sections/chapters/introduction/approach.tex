@@ -39,6 +39,10 @@ benchmarks must be designed to be comparable across the tested systems - in our 
 we have taken from the benchmark games were chosen for their broad applicability and may not cover a sufficient amount
 of Python constructs to be useful for our purposes.
 Nevertheless, the benchmarks will provide a good starting point for our research.
+In a parallel approach, we can find example code to benchmark specific sectors by searching for research papers
+comparing technologies in that sector, this provides a more focused approach to targeting specific concepts in Python,
+as sufficiently well presented papers will provide control groups to eliminate technology bias.
+For this report we have identified [TODO FILL IN]
 
 The next natural avenue to search is example code for certain functionalities, unfortunately this is also very use-case
 specific.
@@ -55,7 +59,7 @@ covered in the executions.
 Unfortunately any kind of curation requires a manual review process, which is constrained by time, this introduces the
 possibility of certain operations being underrepresented in the results.
 
-\subsubsection{Data Collection}
+\subsubsection{Data Collection}\label{subsubsec:intro-data-collection}
 Data collection will be done using the RAPL interface, which is widely accepted as a sufficiently reliable method of
 measuring energy[SOURCES].
 
@@ -66,6 +70,10 @@ For the purposes of our experiments we will retrieve the energy values in micro-
 can be done simply by reading the files exposed in the powercap interface).
 Our method for retrieving this data is to manually find where each RAPL domain is stored, and retrieving the number that
 is stored there - later we can compare these numbers to retrieve a delta of energy usage.
+To have a better idea of the energy usage throughout a script's execution, we will retrieve the energy usage at regular
+intervals throughout the script's execution, this will also help identify any anomalous behaviour in the energy usage.
+The disadvantage of this is similar to the disadvantage of physical energy meters, as there is no way to guarantee that
+the beginning of the script is synced with the first energy reading, multiple experiments can mitigate this issue.
 
 The first and easiest way to measure the energy usage of a script is to measure the energy before and after, this
 functionality is provided quite simply via the perf tool.
@@ -91,6 +99,56 @@ will delay the next poll, this means that the interval does not remain consisten
 Finally, in the event that the results of this report are to be reproduced, it should be noted that the cron service is
 not a guaranteed part of all Linux systems, and may have to be manually installed.
 
-The next logical step is to attempt to take advantage of the systemd service manager
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/introduction/crontab_energy_polling}
+    \caption{Using crontab to poll for energy usage every second, the inconsistency of intervals can be seen to cause
+    spikes in the data that would have to be normalised for a more accurate representation of the data.}
+    \label{fig:crontab_energy_polling}
+\end{figure}
 
+The next logical step is to attempt to take advantage of the systemd service manager, which allows creation of custom
+daemon services, this includes a timer functionality that allows us to run a polling script every second.
+As we can see in~\ref{fig:systemd_energy_polling}, the systemd service provides a more consistent interval between
+polls, which reduces variance.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=15cm]{figures/introduction/systemd_energy_polling}
+    \caption{Using systemd to poll for energy usage every second, the consistency of intervals can be seen to provide a
+    more consistent data set, however there is still clear visible variation in the data that may pollute results}
+    \label{fig:systemd_energy_polling}
+\end{figure}
+
+\begin{lstlisting}[caption={power and temperature logging script},captionpos=b,label={lst:powerlog-script}]
+ENERGYOUT=###############
+TEMPOUT=#################
+ENERGY_FILE=$(cat ###############)
+
+time=$(date +"%y-%m-%d %T")
+energy=$(cat $ENERGY_FILE | sed -z 's/\n/,/g')
+temp=$(sensors | awk -F '°' '/^Core/{gsub("[[:space:]]+",""); printf "%s,", $1}')
+
+echo "RUNNING POWERLOG"
+printf "$time,$energy\n" >> $ENERGYOUT
+printf "$time,$temp\n" >> $TEMPOUT
+\end{lstlisting}
+\begin{lstlisting}[caption={systemd service},captionpos=b,label={lst:systemd-energy-polling}]
+[Unit]
+Description=Run profiler every second
+StartLimitIntervalSec=60
+StartLimitBurst=61
+
+[Service]
+ExecStart=/usr/bin/bash #########/powerlog.sh
+User=#######
+
+[Install]
+WantedBy=multi-user.target
+\end{lstlisting}
+\begin{lstlisting}[caption={systemd timer},captionpos=b,label={lst:systemd-energy-timer}]
+[Timer]
+OnUnitActiveSec=1s
+AccuracySec=1us
+Unit=profiler.service
+\end{lstlisting}
