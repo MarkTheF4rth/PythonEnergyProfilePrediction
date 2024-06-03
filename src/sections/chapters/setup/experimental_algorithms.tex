@@ -1,9 +1,31 @@
-This section will cover the algorithms used for experimentation in this paper, as well as the reasoning behind their
-usage.
-Each algorithm is intended to expose different qualities of a Python program, in an attempt to expose edge cases that
-may arise from assumptions made.
-We will also use this section to highlight baseline energy usage for each algorithm, which can be used for later
-comparisons.
+The intent of this section is to define and justify the algorithms we have chosen to test in our research, additionally,
+we can use preliminary tests of each algorithm as a baseline for their respective energy footprints in the Implementation
+chapter.
+
+\subsubsection{Experimental Space}
+To prevent bias in specific operations, this paper will attempt to use a variety of scripts that perform different
+purposes.
+As a time constraint, the scripts should be simple to execute, and ideally should have very little ambiguity on their
+intended execution - as an example, python libraries will not be considered, as they perform many functions, and it is
+difficult to determine an execution path without a full understanding of the library.
+Consequently, programs that operate on a resource, or connect to the internet will also not be considered, to prevent
+time wasted on debugging network issues or misunderstandings of the operable resource.
+
+Constraining the experimental space like this introduces an obvious bias, this can be addressed in continuations of this
+research by expanding the experimental space to include more complex scripts.
+
+The most obvious approach is to start by running benchmarks, as they are often designed to test the limits of a system
+and are likely to explore a wide range of operations to draw conclusions.
+For this report we will use the scripts defined in the Debian computer languages benchmark game\cite{BenchmarkGame}.
+Relying on benchmarks has two major drawbacks: the first is that benchmarks necessarily are not a good representation
+of a typical use case of a system, rather a way to expose the flaws of the tested system; the second issue is that
+benchmarks must be designed to be comparable across the tested systems - in our case this means that all the algorithms
+we have taken from the benchmark games were chosen for their broad applicability and may not cover a sufficient amount
+of Python constructs to be useful for our purposes.
+Nevertheless, the benchmarks will provide a good starting point for our research.
+In a parallel approach, we can find example code to benchmark specific sectors by searching for research papers
+comparing technologies in that sector, this provides a more focused approach to targeting specific concepts in Python,
+as sufficiently well presented papers will provide control groups to eliminate technology bias.
 
 We will attempt to keep algorithms at a baseline of 10 minute runs, this duration is chosen simply for convenience, as
 it is short enough to run multiple times, and long enough to aid visual analysis of the data.
@@ -21,8 +43,7 @@ For this reason, when forecasting future results, we can ignore baseline costs.
 \begin{figure}[H]
     \centering
     \includegraphics[width=15cm]{figures/implementation/sleep_repetition}
-    \caption{Running sleep within python for 10 minutes, experiment durations are highlighted in grey (one result has
-    been removed due to incorrect execution)}
+    \caption{Running sleep within python for 10 minutes, experiment durations are highlighted in grey}
     \label{fig:sleep_repeating}
 \end{figure}
 
@@ -32,29 +53,6 @@ effect on overall power consumption, we will attempt to make the assumption that
 usr or sys accounts for zero energy usage.
 This assumption is likely incorrect, as simply executing the script will incur an energy cost, however we believe that
 the value is low enough that it can be safely ignored.
-
-\textbf{PyTracer}
-Unfortunately the sleep command itself is too trivial to create any output that can be used for meaningful analysis, as
-\ref{lst:sleep-command-trace} shows, the only output is the loading of constants and the return value.
-This is consistent with the theory that the sleep method has no energy cost, as it can be clearly seen that no opcodes
-are executed during its duration.
-For the time being we have chosen to add datetimes to each opcode execution, however we will revisit this decision when
-more opcodes are executed, as the additional call to the datetime module may be adding overhead to the process.
-
-\begin{lstlisting}[caption={systemd timer},captionpos=b,label={lst:sleep-command-trace}]
-2024-05-27 15:04:14.334866 # LOAD_CONST (100) #
-2024-05-27 15:04:14.334891 # LOAD_CONST (100) #
-2024-05-27 15:04:14.334898 # IMPORT_NAME (108) #
-2024-05-27 15:04:14.334903 # STORE_FAST (125) #
-2024-05-27 15:04:14.334910 # LOAD_FAST (124) #
-2024-05-27 15:04:14.334916 # LOAD_METHOD (160) #
-2024-05-27 15:04:14.334921 # LOAD_CONST (100) #
-2024-05-27 15:04:14.334927 # PRECALL (166) #
-2024-05-27 15:04:14.334933 # CALL (171) #
-2024-05-27 15:14:14.335116 # POP_TOP (1) #
-2024-05-27 15:14:14.335206 # LOAD_CONST (100) #
-2024-05-27 15:14:14.335230 # RETURN_VALUE (83) #
-\end{lstlisting}
 
 \subsubsection{N-Body}
 The n-body problem is a classic problem in physics, and is used to simulate the motion of celestial bodies in a system.

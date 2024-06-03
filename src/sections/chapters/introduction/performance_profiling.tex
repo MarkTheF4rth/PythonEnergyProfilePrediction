@@ -1,18 +1,22 @@
 This section will explore accepted ways to profile the speed of python applications.
 Microsoft Visual Studio recognizes three forms of profiling: sampling, instrumentation, and
-tracing\cite{MicrosoftProfiling}.
+tracing\cite{MicrosoftProfilingTechniques}.
 Profiling is a balance, as the more detailed the profiling, the more overhead is introduced to the script, in this
-section we will explore we will explore all the aforementioned methods of profiling, and find the most appropriate
+section we will explore all the aforementioned methods of profiling, and find the most appropriate
 balance between detail and overhead.
 
 \subsubsection{Bash Time}\label{subsubsec:bash_time}
 Assuming the script is being run in a bash terminal, the time command\cite{BashTime} is a standard
 simple approach to finding execution time; as per the documentation this outputs 3 values: real, user, and sys time.
+Real time refers to the total time taken for the script to execute, user time refers to the time spent executing
+instructions on the CPU in user space, while sys time refers to the time spent executing calls in kernel space with
+elevated privileges.
 This is immediately more useful than a regular clock approach, as it gives us insight into the execution time at
 different levels of processing.
 The bash time function returns results in milliseconds, with both user and sys time being translated from clock ticks
-within the CPU - this makes it difficult to judge the accuracy of such measurements, as they are heavily hardware
-dependant, for the purpose of this report we will assume it is sufficient.
+within the CPU - this makes it difficult to judge the accuracy of such measurements, as ``\textit{the value of HZ varies
+across kernel versions and hardware platforms}''\cite{BashTimeClock}, for the purpose of this report we will assume it is
+sufficient.
 Lastly, as the timer is not connected to the script being tested, there is no way to create a profiler that can locate
 exact points of inefficiency, simply indicate that they exist - this can be partially circumvented by creating
 profiles for units of code that can be applied using static profilers.
@@ -31,8 +35,8 @@ Perf is a complex Linux tool designed to collect a myriad of different events, f
 \textit{record} and \textit{report} functionality, which gathers samples of the \texit{cycles} event, this compiled 
 information can be displayed as a report with various different tools, such as the gecko tool displayed in
 fig\ref{fig:perf_gecko}.
-Perf has the advantage of (if enabled) describing the entire system in its report, unfortunately this requires
-additional into threads that may be significant to the execution of the script.
+Perf has the advantage of (if enabled) describing the entire system in its report, which can be useful to ascertain
+whether the script is being affected by other processes, or causing extra load not accounted for in the script.
 
 \begin{figure}[H]
     \centering

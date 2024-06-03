@@ -1,0 +1,194 @@
+As purely looking at CPU time doesn't appear to be a reliable method of predicting energy usage, we will now attempt to
+look at the opcodes being executed by each script to see if a conclusion can be drawn between executed opcodes and
+energy usage.
+We have already noted that opcodes can be retrieved by using the sys module, unfortunately there does not appear to be
+a process that can also retrieve the operands provided, which have been suggested to affect energy usage, but possibly
+not by a significant amount~\cite{OperandPower}.
+
+\subsubsection{Opcode Gathering}
+In the exploration of profiling tools~\ref{subsubsec:pytracer} we simply took each opcode and printed it to console.
+This is a good start, but fails to gather data in a meaningful way, and will be useless for larger programs that execute
+more opcodes.
+
+For testing opcode gathering in this section we will use the nbody algorithm, as it scales easily and has a large number
+of operations involved.
+The primary problem with any kind of granular tracing is that the operations involved in the trace naturally interfere
+with the execution of the script itself, as opcodes increase in amount this becomes a very real problem, as we will see
+in following examples.
+
+We are apprehensive of the cost of tracing, and so will choose a very short run of the nbody algorithm for this test to
+begin with, and monitor effects on performance using bash time as we introduce more invasive tracing.
+
+To begin with, we will simply run the nbody algorithm with no tracing, we have chosen an input of 50000 as it runs for
+approximately half a second (we are also continuing to print the output of the algorithm to ensure that there is no
+effect on the value).
+It should be noted that the tests in this section are ad-hoc, and are not intended to be used as a benchmark.
+
+\begin{lstlisting}[caption={Running the nbody problem at an input of 50000},captionpos=b,label={lst:nbody-trace-none}]
+offset_momentum(BODIES['sun'])
+report_energy()
+advance(0.01, 50000)
+
+>>> -0.169075164
+>>> real    0m0,583s
+>>> user    0m0,672s
+>>> sys     0m0,988s
+\end{lstlisting}
+
+Next we add basic tracing with no logic involved to see the cost of tracing itself.
+
+\begin{lstlisting}[caption={Tracing the nbody problem with no trace logic},captionpos=b,label={lst:nbody-trace-min}]
+def trace(frame, event, arg):
+    return trace
+
+sys.settrace(trace)
+
+offset_momentum(BODIES['sun'])
+report_energy()
+advance(0.01, 50000)
+
+sys.settrace(None)
+
+>>> -0.169075164
+>>> real    0m1,915s
+>>> user    0m1,987s
+>>> sys     0m0,973s
+\end{lstlisting}
+
+Lastly, to retrieve the opcodes executed by the system, we must also enable the tracer to trace them, we test the effect
+of this by adding a boolean assignment inside the trace function.
+
+\begin{lstlisting}[caption={Tracing the nbody problem with opcodes enabled},captionpos=b,label={lst:nbody-trace-opc}]
+def trace(frame, event, arg):
+    frame.f_trace_opcodes = True
+    return trace
+
+sys.settrace(trace)
+
+offset_momentum(BODIES['sun'])
+report_energy()
+advance(0.01, 50000)
+
+sys.settrace(None)
+
+>>> -0.169075164
+>>> real    0m8,320s
+>>> user    0m8,249s
+>>> sys     0m1,057s
+\end{lstlisting}
+
+As we can see by these tests, enabling opcodes in the trace alone has an effect an entire order of magnitude greater
+than the original run-time, this likely already makes the approach unviable for the purpose of the report, which is to
+create a tool that can be used to predict energy usage in a reasonable amount of time.
+Despite this, we will continue to explore the concept of opcode tracing, as it may be useful for smaller scripts, or for
+gathering snippets of larger algorithms.
+
+Finding the least logic required to trace opcodes is a difficult process, and there are likely other ideas to attempt in
+achieving smaller workloads between opcodes, here we document our attempts:
+First we attempt to simply print the opcodes directly to console, this is a naive approach, but fully functional and
+gives us a starting point to optimise from.
+
+\begin{lstlisting}[caption={Naive opcode printing approach},captionpos=b,label={lst:nbody-trace-orig}]
+def trace(frame, event, arg):
+    frame.f_trace_opcodes = True
+    print(dis.opname[frame.f_code.co_code[frame.f_lasti]])
+    return trace
+sys.settrace(trace)
+
+offset_momentum(BODIES['sun'])
+report_energy()
+advance(0.01, 50000)
+
+sys.settrace(None)
+
+>>> RESUME
+>>> LOAD_FAST
+>>> LOAD_FAST
+>>> GET_ITER
+>>> ...
+>>> -0.169075164
+>>> ...
+>>> LOAD_CONST
+>>> RETURN_VALUE
+>>> RETURN_VALUE
+
+>>> real    20m29,021s
+>>> user    2m29,438s
+>>> sys     1m20,866s
+\end{lstlisting}
+
+To create an efficient tracer in Python space (compiled solutions will be reserved for future work), we have identified
+two potential approaches towards reducing the overhead of the tracer:
+
+\textbf{Aggregation} - Instead logging each opcode, we can aggregate the opcodes into a map structure that gets
+incremented, providing a count of each opcode at the end and reducing the amount of data being stored; the downside of
+this approach is that it may not be possible to determine the order of opcodes executed.
+
+\textbf{Streaming} - On Linux the print statement sends data to the stdout buffer\cite{Stdout}, which is then flushed to
+the console, the print statement unfortunately also has significant overhead\cite{PythonBuiltIns}, so to make this solution
+work, we will have to bypass the regular logic Python uses and write directly to either a stream or a file, whichever is
+more efficient.
+This solution will allow us to preserve the order of the opcodes, and find patterns in the order of their execution, but
+it creates a lot of extra data that must then be processed and analysed.
+
+\begin{lstlisting}[caption={Tracing the nbody problem using aggregation},captionpos=b,label={lst:nbody-trace-agg}]
+def trace(frame, event, arg):
+    frame.f_trace_opcodes = True
+    events[frame.f_code.co_code[frame.f_lasti]] += 1
+    return trace
+sys.settrace(trace)
+offset_momentum(BODIES['sun'])
+report_energy()
+advance(0.01, 50000)
+
+sys.settrace(None)
+
+events = pd.Series(events)
+print('\n'.join([f"{dis.opname[x]} - {y}" for x, y in events[events > 0].items()]))
+
+>>> -0.169075164
+>>> POP_TOP - 1.0
+>>> BINARY_SUBSCR - 3750000.0
+>>> ...
+>>> PRECALL - 500002.0
+>>> CALL - 500002.0
+
+>>> real    0m29,549s
+>>> user    0m29,574s
+>>> sys     0m1,001s
+\end{lstlisting}
+
+The most efficient aggregation solution we found was to generate a numpy\cite{NumPy} array of zeros, and then increment
+them, this solution unfortunately still requires indexing, which is likely the cause of the ~4 times increase in
+execution time (we consider the loss of memory on unused opcodes to be negligible, as the array is only 256 elements
+long).
+
+\begin{lstlisting}[caption={Tracing the nbody problem using streaming},captionpos=b,label={lst:nbody-trace-stream}]
+def trace(frame, event, arg):
+    frame.f_trace_opcodes = True
+    opout.write(str(frame.f_code.co_code[frame.f_lasti])+',')
+    return trace
+sys.settrace(trace)
+offset_momentum(BODIES['sun'])
+report_energy()
+advance(0.01, 50000)
+
+sys.settrace(None)
+
+>>> -0.169075164
+>>> real    0m28,407s
+>>> user    0m28,290s
+>>> sys     0m1,075s
+\end{lstlisting}
+
+The most efficient streaming solution we found was to append to a file on the system, while it is slightly faster than
+the aggregation solution, it requires more post-processing to be useful, and notably generated 305MB of data in a script
+that normally has a 0.5 second runtime.
+As opcode numbers are not uniform length, a separator is required to split the opcodes, this action accounts for
+approximately 1/3 of the overhead.
+
+\subsubsection{Conclusion}
+While the opcode tracing approach is interesting, and may be useful for smaller scripts, all of our
+efforts to reduce the overhead of the tracer have failed, resulting in a minimum of 50 times overhead for our most
+efficient attempts.
+A continuation of this report may involve a compiled solution, or a more efficient method of opcode tracing.

@@ -1,5 +1,4 @@
 # Energy usage info
-
 @article{DockerRAPL,
     title = {How does docker affect energy consumption? Evaluating workloads in and out of Docker containers},
     journal = {Journal of Systems and Software},
@@ -14,7 +13,7 @@
     abstract = {Context: Virtual machines provide isolation of services at the cost of hypervisors and more resource usage. This spurred the growth of systems like Docker that enable single hosts to isolate several applications, similar to VMs, within a low-overhead abstraction called containers. Motivation: Although containers tout low overhead performance, how much do they increase energy use? Methodology: This work statistically compares the energy consumption of three application workloads in Docker and on bare-metal Linux. Results: In all cases, there was a statistically significant (t-test and Wilcoxon p.05) increase in energy consumption when running tests in Docker, mostly due to the performance of I/O system calls. Developers worried about I/O overhead could consider baremetal deployments over Docker container deployments.}
 }
 
-@article{RAPLOnVMS,
+@article{RAPLDomainInfo,
     author = {Khan, Kashif Nizam and Hirki, Mikael and Niemi, Tapio and Nurminen, Jukka K. and Ou, Zhonghong},
     title = {RAPL in Action: Experiences in Using RAPL for Power Measurements},
     year = {2018},
@@ -35,22 +34,23 @@
 }`
 
 @ARTICLE{EnergyConsumptionKnowledge,
-    author={Pang, Candy and Hindle, Abram and Adams, Bram and Hassan, Ahmed E.},
-    journal={IEEE Software},
-    title={What Do Programmers Know about Software Energy Consumption?},
-    year={2016},
-    volume={33},
-    number={3},
-    pages={83-89},
-    keywords={Software engineering;Energy consumption;Power demand;Energy measurement;Software measurement;Mobile handsets;Battery charge measurement;software energy consumption;energy efficiency;software power consumption;power usage},
-    doi={10.1109/MS.2015.83}
+    author = {Pang, Candy and Hindle, Abram and Adams, Bram and Hassan, Ahmed E.},
+    journal = {IEEE Software},
+    title = {What Do Programmers Know about Software Energy Consumption?},
+    year = {2016},
+    volume = {33},
+    number = {3},
+    pages = {83-89},
+    keywords = {Software engineering;Energy consumption;Power demand;Energy measurement;Software measurement;Mobile handsets;Battery charge measurement;software energy consumption;energy efficiency;software power consumption;power usage},
+    doi = {10.1109/MS.2015.83}
 }
+
 @InProceedings{VMHPCViability,
-        author="Breitbart, Jens
+    author = "Breitbart, Jens
     and Pickartz, Simon
     and Weidendorfer, Josef
     and Monti, Antonello",
-        editor="Desprez, Fr{\'e}d{\'e}ric
+    editor = "Desprez, Fr{\'e}d{\'e}ric
     and Dutot, Pierre-Fran{\c{c}}ois
     and Kaklamanis, Christos
     and Marchal, Loris
@@ -63,19 +63,19 @@
     and Scott, Stephen L.
     and Lankes, Stefan
     and Weidendorfer, Josef",
-        title="Viability of Virtual Machines in HPC",
-        booktitle="Euro-Par 2016: Parallel Processing Workshops",
-        year="2017",
-        publisher="Springer International Publishing",
-        address="Cham",
-        pages="721--733",
-        abstract="Virtualization is common in various areas ranging from mobiles to large data centers operated by cloud providers. Theoretically, virtualization provides various benefits that could be useful to HPC as well, e.g., suspend a large application before system maintenance or migrate a process before a node fails due to hardware malfunctioning.",
-        isbn="978-3-319-58943-5"
+    title = "Viability of Virtual Machines in HPC",
+    booktitle = "Euro-Par 2016: Parallel Processing Workshops",
+    year = "2017",
+    publisher = "Springer International Publishing",
+    address = "Cham",
+    pages = "721--733",
+    abstract = "Virtualization is common in various areas ranging from mobiles to large data centers operated by cloud providers. Theoretically, virtualization provides various benefits that could be useful to HPC as well, e.g., suspend a large application before system maintenance or migrate a process before a node fails due to hardware malfunctioning.",
+    isbn = "978-3-319-58943-5"
 }
 
 @ONLINE{FrontierEnergyUsage,
-title = {Fact file: Computing is using more energy than ever.},
-url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-energy-than-ever/}
+    title = {Fact file: Computing is using more energy than ever.},
+    url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-energy-than-ever/}
 
 }
 
@@ -99,8 +99,8 @@ url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-ene
 
 
 @ONLINE{IEADataCentres,
-    title={Data Centres and Data Transmission Networks},
-    url={https://www.iea.org/energy-system/buildings/data-centres-and-data-transmission-networks}
+    title = {Data Centres and Data Transmission Networks},
+    url = {https://www.iea.org/energy-system/buildings/data-centres-and-data-transmission-networks}
 }
 
 @ONLINE{KIOCostsOfDataCentre,
@@ -117,9 +117,10 @@ url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-ene
     title = {What Smartphone Buyers Really Want},
     url = {https://www.statista.com/chart/5995/the-most-wanted-smartphone-features/},
 }
+
 @ONLINE{OperandPower,
-    title={Software-based Power Side-Channel Attacks on x86},
-    url={https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9519416}
+    title = {Software-based Power Side-Channel Attacks on x86},
+    url = {https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9519416}
 }
 
 # Performance vs Energy usage
@@ -203,18 +204,25 @@ url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-ene
 # Technologies
 
 @ONLINE{BashTime,
-    title = {BashTime},
+    title = {Linux man page time(1)},
     url = {https://man7.org/linux/man-pages/man1/time.1.html}
+}
+
+@ONLINE{BashTimeClock,
+    title = {Linux man page time(7)},
+    url = {https://man7.org/linux/man-pages/man7/time.7.html},
 }
 
 @ONLINE{PythonLogging,
     title = {Python Logging},
     url = {https://docs.python.org/3/library/logging.html}
 }
+
 @ONLINE{PythonTime,
     title = {Python Time},
     url = {https://docs.python.org/3/library/time.html#module-time}
 }
+
 @ONLINE{PythonTimePEP,
     title = {Python Time PEP},
     url = {https://peps.python.org/pep-0564/}
@@ -234,6 +242,7 @@ url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-ene
     title = {Python Disassembler},
     url = {https://docs.python.org/3/library/dis.html#analysis-functions},
 }
+
 @ONLINE{LinuxPowerCap,
     title = {Linux Power Cap},
     url = {https://www.kernel.org/doc/html/latest/admin-guide/pm/powercap.html}
@@ -244,6 +253,30 @@ url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-ene
     url = {https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/running-average-power-limit-energy-reporting.html}
 }
 
+@ONLINE{PythonBuiltIns,
+    title = {Python Built-in Functions},
+    url = {https://github.com/python/cpython/blob/v3.12.0/Python/bltinmodule.c#L2006}
+}
+
+@ONLINE{NumPy,
+    title={NumPy Org},
+    url = {https://numpy.org/},
+}
+
+@ONLINE{Stdout,
+    title = {Linux Standard Output},
+    url = {https://www.putorius.net/linux-io-file-descriptors-and-redirection.html#standard-output-stdout},
+}
+
+@ONLINE{Scaphandre,
+    title = {Scaphandre Documentation},
+    url = {https://hubblo-org.github.io/scaphandre-documentation/index.html},
+}
+
+@ONLINE{ScaphandrePowerConsumption,
+    title={How scaphandre computes per process power consumption},
+    url={https://hubblo-org.github.io/scaphandre-documentation/explanations/how-scaph-computes-per-process-power-consumption.html}
+}
 
 # Performance profiling
 
@@ -256,6 +289,7 @@ url = {https://frontiergroup.org/resources/fact-file-computing-is-using-more-ene
     title = {The Computer Language Benchmarks Game},
     url = {https://benchmarksgame-team.pages.debian.net/benchmarksgame/}
 }
+
 @ONLINE{DataframeBenchmark,
     title = {Benchmarking High-Performance pandas Alternatives},
     url = {https://www.datacamp.com/tutorial/benchmarking-high-performance-pandas-alternatives}

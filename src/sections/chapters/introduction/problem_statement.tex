@@ -1,6 +1,6 @@
 \subsection{Context}\label{subsec:context}
 Energy usage is a growing concern of the computing industry\cite{FrontierEnergyUsage,HistoricalComputingEnergyTrends},
-with Python being a widely used language\cite{TIOBE}, it is a prime candidate for energy optimisation.
+with Python being a widely used language\cite{TIOBE}, it is a prime candidate for energy optimisation research.
 
 Energy optimisation has incentivised approach in several computing sectors, including but not limited to server hosting
 and mobile technology.
@@ -16,8 +16,9 @@ energy usage for longer uptime\cite{SmartPhoneFeatures}.
 Surveys on conventional knowledge on energy consumption show a general lack of understanding for avenues to improving
 power saving\cite{EnergyConsumptionKnowledge}, this means that even if developers choose to optimise their code for
 energy efficiency, they may not know how to do so.
-This issue is exacerbated by the opacity of modern proprietary hardware, and the layers of abstraction that modern
-computers operate on - leading to a lack of understanding of the energy costs of specific operations.
+This issue is exacerbated by the opacity of the variety of modern hardware (which can be complex to learn the details of
+) and the layers of abstraction that modern computers operate on - leading to a lack of understanding of the energy
+costs of specific operations.
 
 These issues are not unique to energy optimisation, and the general approach is to target general abstract concepts
 that are known to create inefficiencies, such as memory management, caching, and system calls.
@@ -31,7 +32,6 @@ Developers who want to measure the energy profile of their system must find and 
 knowledge of the system that the software is running on, information which may not even be readily accessible in
 situations such as automated testing or cloud computing.
 
-
 In summary, while both performance and energy profiling have their own challenges, performance profiling is more
 accessible and easier to implement than energy profiling.
 
@@ -42,8 +42,24 @@ To do this, we will have to find patterns that affect performance and energy in 
 system calls, memory interactions, or higher level concepts.
 Furthermore, we must test that these patterns scale, as specific concepts involving memory management and caching may
 require more advanced approaches to make accurate predictions.
+A completed product of this research would be a process that can be implemented with minimal developer effort or
+performance overhead, to aid in the adoption of energy efficient programming practices.
+The questions we aim to answer are:
 
 \begin{itemize}
  \item How does the performance of a Python application relate to its energy usage?
  \item What techniques are required to accurately infer the energy profile of a Python application?
+ \item How can these techniques be applied in a convenient and non-invasive manner?
 \end{itemize}
+
+\subsection{Justification}\label{subsec:justification}
+The positive correlation between performance optimisation and energy optimisation is rather intuitive, as many
+strategies for performance optimisation (such as reducing unnecessary execution) are congruent with energy optimisation.
+This correlation appears to transcend programming languages themselves, with studies into energy usage of languages
+coming up with similar ratios of energy against time for the same algorithms\cite{EnergyEfficiencyAcrossProgrammingLanguages}.
+
+In comparison to performance profiling, energy profiling can be far more cumbersome to execute - as there is no truly
+accurate way to attribute energy usage to any specific process.
+This has lead to the suggestion of using performance profiling as a proxy to loosely optimise energy
+cost\cite{PerformanceVEnergyMobile} with papers suggesting that execution time can be used to directly infer energy
+cost\cite{ExecutionTimeVsEnergyCost}.
